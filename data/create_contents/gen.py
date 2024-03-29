@@ -1,3 +1,4 @@
+# cd data/create_contents
 import os
 import re
 import json
@@ -44,6 +45,14 @@ def get_new_url_list():
 def get_sentence(text):
     contents = []
     for sent in nlp(text).sents:
+        if str(sent).count("「") != str(sent).count("」"):
+            continue
+        if str(sent).count("（") != str(sent).count("）"):
+            continue
+        if str(sent).count("『") != str(sent).count("』"):
+            continue
+        if str(sent)[0] == "」" or str(sent)[0] == "』" or str(sent)[0] == "）":
+            continue
         if len(sent) <= 15 or 80 < len(sent):
             continue
         contents.append(re.sub(r"［＃.*?］", "", str(sent).strip()))
@@ -58,7 +67,7 @@ def get_ids(url: str):
 
 
 def main():
-    ADD_CONTENTS_LIMIT = 25
+    ADD_CONTENTS_LIMIT = 10
     cnt = 0
     urls = list(get_new_url_list())
     for url in urls:
@@ -67,15 +76,20 @@ def main():
         bs = BeautifulSoup(res.text, "xml")
         if bs.select_one(".title") is None:
             continue
-        title = bs.select_one(".title").text
-        author = bs.select_one(".author").text
-        raw_data = bs.select_one(".main_text").text
-        contents = re.sub(r"（[ぁ-んァ-ヶ]+）", "", raw_data)
+        try:
+            title = bs.select_one(".title").text
+            author = bs.select_one(".author").text
+            raw_data = bs.select_one(".main_text").text
+            contents = re.sub(r"（[ぁ-んァ-ヶ]+）", "", raw_data)
+        except AttributeError as e:
+            continue
         try:
             data = get_sentence(contents)
             if not data:
+                print("No data")
                 continue
-        except Exception:
+        except Exception as e:
+            print(e)
             continue
         rec = {
             "title": title,
