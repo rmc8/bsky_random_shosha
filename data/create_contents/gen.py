@@ -67,7 +67,7 @@ def get_ids(url: str):
 
 
 def main():
-    ADD_CONTENTS_LIMIT = 10
+    ADD_CONTENTS_LIMIT = 50
     cnt = 0
     urls = list(get_new_url_list())
     for url in urls:
